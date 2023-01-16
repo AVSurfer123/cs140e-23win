@@ -1,9 +1,14 @@
-*~
-*.bak
-*.staff
-*-staff
-*.swp
-*.swo
-staff-*.txt
-staff-*.c
-.gdb_history
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+!Makefile*
+
+# Unignore all dirs
+!*/
+
+### Above combination will ignore all files without extension ###
+
+*.o*
+*.d

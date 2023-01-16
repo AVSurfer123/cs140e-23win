@@ -28,9 +28,9 @@ check:  trojan-compiler2
     # we know we have the same, but if it fails it doesn't mean we have
     # a problem --- the real test is the login.
 
-	diff cc-attacked cc-attacked2
-	@echo "success: trojan generated itself!"
-	@echo ""
+	# diff cc-attacked cc-attacked2
+	# @echo "success: trojan generated itself!"
+	# @echo ""
 
 	@echo "\n----------------------------------"
 	@echo "checking that the login attack will work."

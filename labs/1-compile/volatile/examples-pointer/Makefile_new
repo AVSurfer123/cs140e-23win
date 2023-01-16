@@ -1,0 +1,37 @@
+
+# %.o: %.c
+# 	arm-none-eabi-gcc $(CFLAGS) -c $^ -o $@
+# 	arm-none-eabi-objdump -d $@ > $@.dis
+
+# clean:
+# 	rm -f  *.dis *.o *~ *.s
+
+src = $(wildcard *.c)
+obj = $(src:.c=.o)
+dep = $(obj:.o=.d)  # one dependency file for each source
+base = $(basename $(src))
+
+CC = arm-none-eabi-gcc
+OD = arm-none-eabi-objdump
+CFLAGS = -MMD -O3 -Wall -std=gnu99  # option to generate a .d file during compilation
+LDFLAGS =
+
+.PHONY: clean all
+
+all: $(obj)
+
+%.o: %.c
+	@$(CC) $(CFLAGS) -c $^ -o $@ $(LDFLAGS)
+	@$(OD) -d $@ > $@.dis
+
+	@echo "------------- $*.c ---------------\n";
+	@cat $*.c 
+	@echo "------------- $*.o ---------------\n";
+	@$(CC) $(CFLAGS) -c $^ -o $@ $(LDFLAGS)
+	@$(OD) -d $@ > $@.dis
+	@cat $@.dis
+
+-include $(dep)   # include all dep files in the makefile
+
+clean:
+	rm -f $(obj) $(obj:.o=.o.dis) $(dep) 

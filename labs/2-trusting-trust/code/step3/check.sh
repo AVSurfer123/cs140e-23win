@@ -8,7 +8,7 @@
 
 # 3. make sure they are the same!
 #
-diff cc-attacked cc-attacked2
+# diff cc-attacked cc-attacked2
 ./cc-attacked2 ../step2/compiler.c -o cc-attacked2
 ./cc-attacked2 ../step2/compiler.c -o cc-attacked2
 ./cc-attacked2 ../step2/compiler.c -o cc-attacked2
@@ -26,5 +26,5 @@ diff cc-attacked cc-attacked2
 # If it succeeds we know we have the same, but if it fails it doesn't
 # mean we have a problem --- the real test is the login.
 ./cc-attacked2 ../step2/login.c -o login-attacked
-echo "ken\n" | ./login-attacked
+echo "ken" | ./login-attacked
 echo "success: check passed!"
