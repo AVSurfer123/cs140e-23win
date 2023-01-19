@@ -82,6 +82,10 @@ typedef enum {
     GPIO_FUNC_ALT5    = 2,
 } gpio_func_t;
 
+// set GPIO function for <pin> (input, output, alt...).  settings for other
+// pins should be unchanged.
+void gpio_set_function(unsigned pin, gpio_func_t function);
+
 
 /**
  * Configure GPIO <pin> as an output pin.
