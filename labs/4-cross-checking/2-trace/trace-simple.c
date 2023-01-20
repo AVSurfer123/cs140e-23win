@@ -25,6 +25,13 @@ unsigned __real_GET32(unsigned addr);
 void __wrap_PUT32(unsigned addr, unsigned val);
 void __real_PUT32(unsigned addr, unsigned val);
 
+#define MAX_BUF_LENGTH 4096
+unsigned addr_buf[MAX_BUF_LENGTH];
+unsigned val_buf[MAX_BUF_LENGTH];
+uint8_t type_buf[MAX_BUF_LENGTH];
+uint32_t length;
+uint8_t buffer_on = 0;
+
 // simple state machine to track what set of options we're called with.
 enum {
     TRACE_OFF = 0,
@@ -32,6 +39,20 @@ enum {
     TRACE_SKIP   // if running w/o buffering, stop printing trace
 };
 static int state = TRACE_OFF;
+
+// call these to emit so everyone can compare!
+static void emit_put32(unsigned addr, unsigned val) {
+    int old_state = state;
+    state = TRACE_SKIP;
+    printk("TRACE:PUT32(%x)=%x\n", addr, val);
+    state = old_state;
+}
+static void emit_get32(unsigned addr, unsigned val) {
+    int old_state = state;
+    state = TRACE_SKIP;
+    printk("TRACE:GET32(%x)=%x\n", addr, val);
+    state = old_state;
+}
 
 // start tracing : 
 //   <buffer_p> = 0: tells the code to immediately print the 
@@ -42,6 +63,8 @@ static int state = TRACE_OFF;
 void trace_start(int buffer_p) {
     assert(state == TRACE_OFF);
     state = TRACE_ON;
+    length = 0;
+    buffer_on = buffer_p;
 } 
 
 // stop tracing
@@ -50,26 +73,52 @@ void trace_stop(void) {
     assert(state == TRACE_ON);
     state = TRACE_OFF;
     // we would print things out if output was being buffered.
+    for (int i = 0; i < length; i++) {
+        if (type_buf[i]) {
+            emit_put32(addr_buf[i], val_buf[i]);
+        }
+        else {
+            emit_get32(addr_buf[i], val_buf[i]);
+        }
+    }
+    if (buffer_on) {
+        length = 0;
+    }
 }
 
-// call these to emit so everyone can compare!
-static void emit_put32(uint32_t addr, uint32_t val) {
-    printk("TRACE:PUT32(0x%x)=0x%x\n", addr, val);
-}
-static void emit_get32(uint32_t addr, uint32_t val) {
-    printk("TRACE:GET32(0x%x)=0x%x\n", addr, val);
-}
 
 // the linker will change all calls to GET32 to call __wrap_GET32
 void __wrap_PUT32(unsigned addr, unsigned val) {
     // XXX: implement this function!
-    unimplemented();
+    if (state == TRACE_ON) {
+        if (buffer_on) {
+            addr_buf[length] = addr;
+            val_buf[length] = val;
+            type_buf[length] = 1;
+            length++;
+        }
+        else {
+            emit_put32(addr, val);
+        }
+    }
+    __real_PUT32(addr, val);
 }
 
 // the linker will change all calls to GET32 to call __wrap_GET32
 unsigned __wrap_GET32(unsigned addr) {
     unsigned v = 0;
     // implement this function!
-    unimplemented();
+    v = __real_GET32(addr);
+    if (state == TRACE_ON) {
+        if (buffer_on) {
+            addr_buf[length] = addr;
+            val_buf[length] = v;
+            type_buf[length] = 1;
+            length++;
+        }
+        else {
+            emit_get32(addr, v);
+        }
+    }
     return v;
 }

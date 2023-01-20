@@ -14,4 +14,8 @@
 *.d
 *.elf
 *.bin
-
+*.a
+*.list
+*.fake
+*.hex
+.vscode
