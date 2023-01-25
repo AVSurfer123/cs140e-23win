@@ -53,7 +53,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "fake-pi.h"
 
@@ -125,13 +127,14 @@ enum {
 };
 
 // the value for each location.
-static unsigned 
-        gpio_fsel0_v,
-        gpio_fsel1_v,
-        gpio_fsel2_v,
-        gpio_fsel3_v,
-        gpio_set0_v,
-        gpio_clr0_v;
+// static unsigned 
+//         gpio_fsel0_v,
+//         gpio_fsel1_v,
+//         gpio_fsel2_v,
+//         gpio_fsel3_v,
+//         gpio_set0_v,
+//         gpio_clr0_v;
+static uint32_t gpio_mem[7];
 
 
 // same, but takes <addr> as a uint32_t
@@ -140,12 +143,12 @@ void PUT32(uint32_t addr, uint32_t v) {
         output("initializing PUT32(0x%x) = 0x%x\n", addr, v);
     trace("PUT32(0x%x) = 0x%x\n", addr, v);
     switch(addr) {
-    case gpio_fsel0: gpio_fsel0_v = v;  break;
-    case gpio_fsel1: gpio_fsel1_v = v;  break;
-    case gpio_fsel2: gpio_fsel2_v = v;  break;
-    case gpio_fsel3: gpio_fsel3_v = v;  break;
-    case gpio_set0:  gpio_set0_v  = v;  break;
-    case gpio_clr0:  gpio_clr0_v  = v;  break;
+    case gpio_fsel0: gpio_mem[0] = v;  break;
+    case gpio_fsel1: gpio_mem[1] = v;  break;
+    case gpio_fsel2: gpio_mem[2] = v;  break;
+    case gpio_fsel3: gpio_mem[3] = v;  break;
+    case gpio_set0:  gpio_mem[4]  = v;  break;
+    case gpio_clr0:  gpio_mem[5]  = v;  break;
     case gpio_lev0:  panic("illegal write to gpio_lev0!\n");
     default: panic("write to illegal address: %x\n", addr);
     }
@@ -164,12 +167,12 @@ uint32_t DEV_VAL32(uint32_t x) {
 uint32_t GET32(uint32_t addr) {
     unsigned v;
     switch(addr) {
-    case gpio_fsel0: v = gpio_fsel0_v; break;
-    case gpio_fsel1: v = gpio_fsel1_v; break;
-    case gpio_fsel2: v = gpio_fsel2_v; break;
-    case gpio_fsel3: v = gpio_fsel3_v; break;
-    case gpio_set0:  v = gpio_set0_v;  break;
-    case gpio_clr0:  v = gpio_clr0_v;  break;
+    case gpio_fsel0: v = gpio_mem[0]; break;
+    case gpio_fsel1: v = gpio_mem[1]; break;
+    case gpio_fsel2: v = gpio_mem[2]; break;
+    case gpio_fsel3: v = gpio_mem[3]; break;
+    case gpio_set0:  v = gpio_mem[4];  break;
+    case gpio_clr0:  v = gpio_mem[5];  break;
     // to fake a changing environment, we want gpio_lev0 to 
     // change --- so we return a random value for (which
     // will be roughly uniform random for a given bit).
@@ -177,7 +180,7 @@ uint32_t GET32(uint32_t addr) {
     // realistic by reading from a trace from a run on 
     // the raw hardware, correlating with other pins or 
     // time or ...
-    case gpio_lev0:  v = fake_random();  break;
+    case gpio_lev0:  v = gpio_mem[6]; break; //v = fake_random();  break;
     default: panic("read of illegal address: %x\n", addr);
     }
     trace("GET32(0x%x) = 0x%x\n", addr,v);
@@ -207,14 +210,23 @@ void delay_cycles(unsigned ncycles) {
 int main(int argc, char *argv[]) {
     void notmain(void);
 
+    bool pi_init = false;
+
     if(argc == 1)  {
         fake_random_init();
     } else if(argc == 2) {
-        unsigned seed = atoi(argv[1]);
-        if(seed == 0)
-            panic("seed was <%s>: should be a non-zero number\n", argv[1]);
-        output("TRACE: initializing fake_random to %x\n", seed);
-        fake_random_seed(seed);
+        if (strcmp(argv[1], "-initial") == 0) {
+            fake_random_init();
+            pi_init = true;
+            output("TRACE: initializing GPIO to current Pi values\n");
+        }
+        else {
+            unsigned seed = atoi(argv[1]);
+            if(seed == 0)
+                panic("seed was <%s>: should be a non-zero number\n", argv[1]);
+            output("TRACE: initializing fake_random to %x\n", seed);
+            fake_random_seed(seed);
+        }
     } else
         panic("invalid number of args: %d\n", argc);
 
@@ -224,12 +236,56 @@ int main(int argc, char *argv[]) {
     //
     // we do it raw vs put32 so nothing gets printed.
     trace_off();
-    PUT32(gpio_fsel0, fake_random());
-    PUT32(gpio_fsel1, fake_random());
-    PUT32(gpio_fsel2, fake_random());
-    PUT32(gpio_fsel3, fake_random());
-    PUT32(gpio_set0,  fake_random());
-    PUT32(gpio_clr0,  fake_random());
+    if (pi_init) {
+        int pipe_fd[2];
+        int ret = pipe(pipe_fd);
+        if (ret == -1) {
+            panic("pipe failed");
+        }
+        pid_t pid = fork();
+        if (pid == -1) {
+            panic("fork failed");
+        }
+
+        if (pid == 0) {
+            // dup2(pipe_fd[1], STDOUT_FILENO);
+            dup2(pipe_fd[1], STDERR_FILENO);
+            close(pipe_fd[0]);
+            close(pipe_fd[1]);
+            execlp("pi-install", "pi-install", "../../00-hello/get_gpio.bin", NULL);
+        }
+        else {
+            sleep(5);
+            close(pipe_fd[1]);
+            char output[4096];
+            int num_read = read(pipe_fd[0], output, sizeof(output));
+            output("Read from child: %d\n", num_read);
+            const char* START_STRING = "Start sequence\n";
+            char* ptr = strstr(output, START_STRING);
+            ptr += strlen(START_STRING);
+            for (int i = 0; i < 7; i++) {
+                char* next_line = strchr(ptr, '\n');
+                if (next_line) {
+                    *next_line = '\0';
+                    uint32_t val = strtol(ptr, NULL, 0);
+                    gpio_mem[i] = val;
+                    output("Initializing value 0x%x for %d\n", val, i);
+                    ptr = next_line + 1;
+                }
+                else {
+                    printf("Error: cannot find register value for %d\n", i);
+                }
+            }
+        }
+    }
+    else {
+        PUT32(gpio_fsel0, fake_random());
+        PUT32(gpio_fsel1, fake_random());
+        PUT32(gpio_fsel2, fake_random());
+        PUT32(gpio_fsel3, fake_random());
+        PUT32(gpio_set0,  fake_random());
+        PUT32(gpio_clr0,  fake_random());
+    }
     trace_on();
 
     // extension: run in a subprocess to isolate
