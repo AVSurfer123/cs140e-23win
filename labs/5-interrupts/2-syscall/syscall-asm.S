@@ -25,4 +25,12 @@ MK_FN(syscall_illegal)
 @
 @ does not return
 MK_FN(run_user_code_asm)
-    asm_not_implemented()
+    @ msr cpsr, #(USER_MODE | (1<<7))
+    cps #0b10000
+    prefetch_flush(r2)
+
+    mov sp, r1
+    blx r0
+
+    @ if we return, reboot
+    bl  clean_reboot

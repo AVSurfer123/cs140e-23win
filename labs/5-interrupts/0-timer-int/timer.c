@@ -63,7 +63,7 @@ void notmain() {
 
     printk("setting up timer interrupts\n");
     // Q: if you change 0x100?
-    timer_interrupt_init(0x100);
+    timer_interrupt_init(0x1);
 
     printk("gonna enable ints globally!\n");
     // Q: what happens (&why) if you don't do?
@@ -76,7 +76,7 @@ void notmain() {
     // the same, some change?
     //enable_cache(); 	
     unsigned iter = 0, sum = 0;
-#   define N 20
+#   define N 100
     while(cnt < N) {
         // Q: if you comment this out?  why do #'s change?
         printk("iter=%d: cnt = %d, time between interrupts = %d usec (%x)\n", 
@@ -93,10 +93,10 @@ void notmain() {
              tot_usec   = (tot % 1000);
     printk("-----------------------------------------\n");
     printk("summary:\n");
-    printk("\t%10d: total iterations\n", iter);
-    printk("\t%10d: tot interrupts\n", N);
-    printk("\t%10d: iterations / interrupt\n", iter/N);
-    printk("\t%10d: average period\n\n", period_sum/(N-1));
+    printk("\t%d: total iterations\n", iter);
+    printk("\t%d: tot interrupts\n", N);
+    printk("\t%d: iterations / interrupt\n", iter/N);
+    printk("\t%d: average period\n\n", period_sum/(N-1));
     printk("total execution time: %dsec.%dms.%dusec\n", 
                     tot_sec, tot_ms, tot_usec);
 

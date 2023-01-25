@@ -95,7 +95,11 @@ software_interrupt_asm:
     @   - call
     @   - restore regs
     @   - return from the exception.
-    asm_not_implemented()
+    push {r4-r12,lr}
+    mov r1, r0
+    sub r0, lr, #4
+    bl syscall_vector
+    pop {r4-r12,lr}
     movs pc, lr
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -113,3 +117,38 @@ prefetch_abort_asm:
 data_abort_asm:
   sub   lr, lr, #4
   bl    data_abort_vector
+
+.globl _int_table_user
+.globl _int_table_user_end
+_int_table_user:
+  ldr pc, _reset_asm
+  ldr pc, _undefined_instruction_asm
+  ldr pc, _user_software_int_asm
+  ldr pc, _prefetch_abort_asm
+  ldr pc, _data_abort_asm
+  ldr pc, _reset_asm
+  ldr pc, _interrupt_asm
+_user_software_int_asm: .word user_software_int_asm
+_int_table_user_end:
+
+user_software_int_asm:
+    @ runs at system level (p.a2-5): assumes we have a sp
+    @ implement: 
+    @   - save regs
+    @   - need to figure out what lr points to,
+    @   - mov the original r0 into r1
+    @   - mov the pointer to the syscall inst into r0
+    @   - call
+    @   - restore regs
+    @   - return from the exception.
+    push {r4-r12,lr}
+    mov r1, r0
+    sub r0, lr, #4
+    bl syscall_vector
+    pop {r4-r12,lr}
+    movs pc, lr
+
+.global spsr_get
+spsr_get:
+    mrs  r0, spsr
+    bx lr
