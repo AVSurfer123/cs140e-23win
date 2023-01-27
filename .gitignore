@@ -19,3 +19,4 @@
 *.fake
 *.hex
 .vscode
+*.test

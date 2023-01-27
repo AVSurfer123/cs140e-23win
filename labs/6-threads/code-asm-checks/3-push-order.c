@@ -24,8 +24,12 @@ void check_push_order(void) {
     assert(ret < p);
 
     // check that regs holds the right values.
-    todo("write the code to check that <ret> holds the expected values.");
-    todo("see caller in <asm-check.S:push_r4_r12_asm>");
+    // todo("write the code to check that <ret> holds the expected values.");
+    // todo("see caller in <asm-check.S:push_r4_r12_asm>");
+    for (int i = 0; i < 9; i++) {
+        printk("%d: %u, %u\n", i, ret[i], p[-i-1]);
+        assert(ret[i] == i + 4);
+    }
 
     return;
 

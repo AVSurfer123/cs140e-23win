@@ -31,9 +31,6 @@
  *    stack.  
  */
 
-// you should define these; also rename to something better.
-#define REG_SP_OFF 36/4
-#define REG_LR_OFF 40/4
 
 #define THREAD_MAXSTACK (1024 * 8/4)
 typedef struct rpi_thread {
@@ -49,6 +46,7 @@ typedef struct rpi_thread {
     const char *annot;
     // threads waiting on the current one to exit.
     // struct rpi_thread *waiters;
+    uint32_t extra[16];
 
 	uint32_t stack[THREAD_MAXSTACK];
 } rpi_thread_t;
@@ -96,7 +94,7 @@ void rpi_yield(void);
 void rpi_cswitch(uint32_t **old_sp_save, const uint32_t *new_sp);
 
 // returns the stack pointer (used for checking).
-const uint8_t *rpi_get_sp(void);
+uint32_t *rpi_get_sp(void);
 
 // check that: the current thread's sp is within its stack.
 void rpi_stack_check(void);

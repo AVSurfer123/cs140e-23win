@@ -1,4 +1,3 @@
--------------------------------------------------------------------------
 ### Lab extensions
 
 There's a lot more you can do.  We will be doing a bunch of this later

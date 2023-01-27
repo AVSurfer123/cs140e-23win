@@ -54,7 +54,6 @@ MK_FN(push_r4_r12_asm)
     mov sp, r1      @ restore sp
     pop {r4-r12}    @ restore trashed regs
     bx lr
-    asm_todo(implement check_push_order_asm)
 
 
 @ save just the callee and lr.
@@ -82,7 +81,8 @@ MK_FN(write_regs_to_stack)
     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @ push all the callee
     @ store sp into the address held in r0
-    asm_todo(implement this)
+    push {r4-r11,lr}
+    str sp, [r0]
     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
     mov r0, sp

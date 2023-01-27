@@ -4,8 +4,11 @@
 
 // implement this code
 int stack_grows_up(void) {
-    todo("implement this routine");
-    return 0;
+    // todo("implement this routine");
+    int a;
+    int b;
+    printk("%x %x\n", &a, &b);
+    return &b > &a;
 }
 
 /******************************************************************
@@ -37,7 +40,7 @@ int check_stack_dir(int n) {
         memset(sp, 0, 4096);
     } else {
         output("grows down: about to memset below\n");
-        memset(sp-1024, 0, 4096);
+        memset(sp-1025, 0, 4096);
     }
     return 0;
 }

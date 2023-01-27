@@ -34,7 +34,13 @@ void after_push(uint32_t *sp_after_push, uint32_t *sp_before_push) {
     // print one or the other depending:
     //      trace("wrote to stack after modifying sp\n");
     //      trace("wrote to stack before modifying sp\n");
-    todo("implement this code: look at caller: <asm-check.S:check_push_asm>");
+    // todo("implement this code: look at caller: <asm-check.S:check_push_asm>");
+    if (*sp_after_push == push_val) {
+        trace("wrote to stack after modifying sp\n");
+    }
+    else {
+        trace("wrote to stack before modifying sp\n");
+    }
 
     // we can't return b/c didn't obey calling convention.
     clean_reboot();
