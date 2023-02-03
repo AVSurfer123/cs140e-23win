@@ -9,6 +9,8 @@ PROGS = $(wildcard ./tests/output-test*.c)
 # do this first to develop
 PROGS = hello.c
 
+PROGS = $(wildcard ./1-*.c)
+
 #once your sw-uart works: add sw-uart-veneer.c
 # COMMON_SRC += sw-uart-veneer.c
 COMMON_SRC += sw-uart.c

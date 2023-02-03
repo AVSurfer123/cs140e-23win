@@ -4,12 +4,12 @@
 
 void notmain(void) {
     uart_init();
-    enable_cache();
+    // enable_cache();
 
     // use pin 20 for tx, 21 for rx
-    sw_uart_t u = sw_uart_mk(20,21, 115200);
+    sw_uart_t u = sw_uart_init(20,21, 115200);
 
-    unsigned n = 2;
+    unsigned n = 1;
 
     printk("about to get %d lines: make sure you've started pi-cat\n", n);
 
@@ -17,10 +17,11 @@ void notmain(void) {
         printk("iter=%d, going to do a get of a whole line: type in the pi-cat window!\n", i);
 
         // this will be on the pi-cat side.
-        sw_uart_printk(&u, "enter a line: ");
+        // sw_uart_printk(&u, "enter a line: ");
 
         char buf[1024];
         int res = sw_uart_gets(&u, buf, sizeof buf-1);
+        printk("Got %d %d\n", strlen(buf), res);
         assert(strlen(buf) == res);
         // kill newline.
         buf[res-1] = 0;

@@ -130,7 +130,7 @@ int get_code(uint32_t *code_addr) {
     }
 
     // 7. send back a BOOT_SUCCESS!
-    boot_putk("Ashwin: success: Received the program!");
+    boot_putk("Ashwin + UART: success: Received the program!");
     // boot_todo("fill in your name above");
 
     // woo!

@@ -15,25 +15,6 @@ void sw_uart_putk(sw_uart_t *uart, const char *msg) {
         sw_uart_put8(uart, *msg);
 }
 
-int sw_uart_gets(sw_uart_t *uart, char *in, unsigned nbytes) {
-    int read = 0;
-    while (read < nbytes) {
-        char byte = sw_uart_get8(uart);
-        in[read] = byte;
-        read++;
-        if (byte == '\n') {
-            in[read] = 0;
-            return read;
-        }
-    }
-    in[read] = 0;
-    return read;
-}
-
-int sw_uart_get8_timeout(sw_uart_t *uart, uint32_t timeout_usec) {
-    return sw_uart_get8(uart);
-}
-
 // helper: cleans up the code: do a write for <usec> microseconds
 //
 // code that uses it will have a lot of compounding error, however.  
@@ -84,9 +65,9 @@ sw_uart_t sw_uart_mk_helper(unsigned tx, unsigned rx,
     //  2: what is the default value of tx for 8n1?  make sure
     //     this is set!!
     // todo("set up the right GPIO pins with the right values");
-    gpio_set_input(rx);
-    gpio_set_output(tx);
-    timed_write(tx, 1, cyc_per_bit);
+    gpio_set_input(GPIO_RX);
+    gpio_set_output(GPIO_TX);
+    timed_write(GPIO_TX, 1, cyc_per_bit);
 
     // check that the given values make sense.
     //
