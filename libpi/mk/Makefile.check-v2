@@ -55,6 +55,7 @@ all:: $(RUN_MK) # $(TEST_RUN) # $(TEST_CHECK)
 	@echo "\n----------------[about to run <./$*]-----------------------";
 	$(BOOT_CMD) ./$< 
 	@echo "-----------------[done running <./$*>]-----------------------";
+	@sleep .5
 
 %.err: %.bin
 	@-./$<  && echo "Fail: did not detect error" || echo "Success: detected error";
@@ -67,6 +68,7 @@ all:: $(RUN_MK) # $(TEST_RUN) # $(TEST_CHECK)
 	@$(BOOT_CMD) ./$< >  $*.raw 2>&1
 	@$(EXCLUDE) $*.raw | sed $(STRIP_BRACKETS) | grep $(GREP_STR) > $*.out
 	@echo " success!";
+	@sleep .5
 
 %.check: %.bin
 	@echo    "-------------------------------------------------";
@@ -82,6 +84,7 @@ all:: $(RUN_MK) # $(TEST_RUN) # $(TEST_CHECK)
 	@diff ./$*.out ./$*.test || (echo "mismatch in reference ($*.out) and test ($*.test): compare them directly to see why"; exit 1)
 	@echo    "  Success!  Matched!";
 	@rm ./$*.test
+	@sleep .5
 
 # we could just cksum all the .outs, but this lets us be more targeted.
 %.cksum: %.out

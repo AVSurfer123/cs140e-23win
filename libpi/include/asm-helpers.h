@@ -1,6 +1,8 @@
 #ifndef __ASM_HELPERS_H__
 #define __ASM_HELPERS_H__
 
+#include <stdint.h>
+
 /*
  * abuse C's macro system to generate inline assembly routines 
  * given the format close to that used in the manual.
