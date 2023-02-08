@@ -47,7 +47,7 @@ char *find_ttyusb(void) {
     struct dirent** dirs;
     int num_dir = scandir("/dev", &dirs, filter, alphasort);
     if (num_dir == -1) {
-        perror("scandir failed");
+        panic("scandir failed");
     }
     printf("Found %d dirs that matched\n", num_dir);
     if (num_dir == 0) {
