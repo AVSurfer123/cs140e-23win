@@ -1,5 +1,5 @@
 # comment out if you want to use your libpi
-LPI = ../staff-objs/libpi.a
+# LPI = ../staff-objs/libpi.a
 
 # include staff for everything so can run completely.
 PROGS := 0-test-checks.c 1-test-run.c

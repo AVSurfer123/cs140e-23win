@@ -1,9 +1,9 @@
 # to use your gpio-int.c swap these.
-# COMMON_SRC := ../2-gpio-int/gpio-int.c
-STAFF_OBJS := ../staff-objs/gpio-int.o
+COMMON_SRC := ../2-gpio-int/gpio-int.c
+# STAFF_OBJS := ../staff-objs/gpio-int.o
 
 # comment out if you want to use your libpi
-LPI = ../staff-objs/libpi.a
+# LPI = ../staff-objs/libpi.a
 
 # level 3: do N iterations of event type.
 # easiest: one type of event.

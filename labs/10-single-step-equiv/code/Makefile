@@ -1,3 +1,5 @@
+COMMON_SRC := interrupt-asm.S debug-fault.c
+
 # SUPPORT_OBJS := debug-fault.o
 
 # comment this out to use your code
@@ -18,13 +20,14 @@ RUN=1
 
 # part 1
 PROGS := $(wildcard ./2-*.c)
-PROGS := $(wildcard ./1-*.c)
-PROGS := $(wildcard ./0-*.c)
+# PROGS := $(wildcard ./1-*.c)
+# PROGS := $(wildcard ./0-*.c)
 
 CFLAGS += -Wno-unused-function -Wno-unused-variable 
 
 # to run all the tests.
-# TEST_SRC := $(wildcard ./[0-9]*.c)
+PROGS := $(wildcard ./[0-3]*.c)
+# PROGS := 3-debug-watchpt.c
 
 # should not have to change below
 
@@ -35,12 +38,24 @@ GREP_STR := 'TRACE:\|THREAD:\|ERROR:\|PANIC:'
 include $(CS140E_2023_PATH)/libpi/mk/Makefile.template
 
 # override the default rules.  should have a cleaner solution
-2-brkpt-test.elf:  2-brkpt-test.o $(DEPS) $(START) $(LIBS)
-	$(LD) $(START)  $< -T $(MEMMAP) -o $@  $(LIBS)
-1-watchpt-test.elf:  1-watchpt-test.o $(DEPS) $(START) $(LIBS)
-	$(LD) $(START)  $< -T $(MEMMAP) -o $@  $(LIBS)
+# 2-brkpt-test.elf:  2-brkpt-test.o $(DEPS) $(START) $(LIBS)
+# 	$(LD) $(START)  $< -T $(MEMMAP) -o $@  $(LIBS)
+# 1-watchpt-test.elf:  1-watchpt-test.o $(DEPS) $(START) $(LIBS)
+# 	$(LD) $(START)  $< -T $(MEMMAP) -o $@  $(LIBS)
 
+2-brkpt-test.elf:  2-brkpt-test.o interrupt-asm.o $(DEPS) $(START) $(LIBS)
+	$(LD) $(START) $< interrupt-asm.o -T $(MEMMAP) -o $@ $(LIBS)
+1-watchpt-test.elf:  1-watchpt-test.o interrupt-asm.o $(DEPS) $(START) $(LIBS)
+	$(LD) $(START) $< interrupt-asm.o -T $(MEMMAP) -o $@ $(LIBS)
+	
+3-debug-brkpt.elf:  3-debug-brkpt.o debug-fault.o interrupt-asm.o $(DEPS) $(START) $(LIBS)
+	$(LD) $(START) $< interrupt-asm.o debug-fault.o -T $(MEMMAP) -o $@ $(LIBS)
+3-debug-watchpt.elf:  3-debug-watchpt.o debug-fault.o interrupt-asm.o $(DEPS) $(START) $(LIBS)
+	$(LD) $(START) $< interrupt-asm.o debug-fault.o -T $(MEMMAP) -o $@ $(LIBS)
+3-debug-byte-access.elf:  3-debug-byte-access.o debug-fault.o interrupt-asm.o $(DEPS) $(START) $(LIBS)
+	$(LD) $(START) $< interrupt-asm.o debug-fault.o -T $(MEMMAP) -o $@ $(LIBS)
 
 clean::
 	rm -f rpi-thread.o thread-asm.o
 	rm -f 2-write-regs-asm.o 2-where-push-asm.o 
+	rm -f *.o
