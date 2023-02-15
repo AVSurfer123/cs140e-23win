@@ -1,6 +1,5 @@
 #include "regs-save-restore.h"
 
-#if 0
 #define TRAMPOLINE_FULL_REGS(fn)    \
   sub sp, sp, #68;                          \
   stm sp, {r0-r14}^;                        \
@@ -16,7 +15,6 @@
   add sp, sp, #60;                          \
   rfe sp;                                   \
   asm_not_reached()
-#endif
 
 
 @ save all the registers in ascending order.
@@ -49,7 +47,5 @@ swi_test_handlers:
     b unhandled_interrupt
     b unhandled_fiq
 
-
-MK_FN(do_swi_test) 
 
 

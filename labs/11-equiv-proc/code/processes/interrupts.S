@@ -1,4 +1,4 @@
-#include "regs-save-restore.h"
+#include "rpi-asm.h"
 
 #define TRAMPOLINE_FULL_REGS(fn)    \
   sub sp, sp, #68;                          \
@@ -26,16 +26,34 @@ single_step_trampoline:
     sub   lr, lr, #4
     TRAMPOLINE_FULL_REGS(single_step_full)
 
+interrupt_trampoline:
+    mov sp, #INT_STACK_ADDR
+    sub   lr, lr, #4
+    TRAMPOLINE_FULL_REGS(timer_interrupt)
+    
+@ pointer to the array passed in <r0>
+@ use rfe to invoke it.
+MK_FN(rfe_asm)
+    rfe r0
+    asm_not_reached();
+
+MK_FN(switchto_user_asm)
+    mov lr, r0
+    ldm lr, {r0-r14}^
+    add lr, lr, #60
+    rfe lr
+    asm_not_reached()
+
 @ only handle single step.
 .align 5; 
-.globl test5_full_single
-test5_full_single:
+.globl interrupt_table
+interrupt_table:
     b unhandled_reset
     b unhandled_undefined_instruction
     b swi_trampoline
     b single_step_trampoline
     b unhandled_data_abort
-    b unhandled_interrupt
-    b unhandled_fiq
+    b interrupt_trampoline
+    b interrupt_trampoline
 
 

@@ -44,6 +44,7 @@ void notmain(void) {
     extern uint32_t simple_single_except[];
     vector_base_set(simple_single_except);
     brkpt_mismatch_start(); 
+    brkpt_mismatch_set(0);
 
     // from <1-srs-rfe.c>
     uint32_t regs[2];

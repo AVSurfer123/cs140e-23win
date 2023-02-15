@@ -1,5 +1,7 @@
 #ifndef __PI_BITSUPPORT_H__
 #define __PI_BITSUPPORT_H__
+#include "rpi.h"
+
 // some simple bit manipulation functions: helps make code clearer.
 
 // set x[bit]=0 (leave the rest unaltered) and return the value
