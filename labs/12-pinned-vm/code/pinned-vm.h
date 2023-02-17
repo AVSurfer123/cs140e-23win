@@ -293,6 +293,8 @@ void staff_pin_check_exists(uint32_t va);
 // valid bit set to 0?   
 void lockdown_print_entries(const char *msg);
 
+void pin_procmap(procmap_t *p);
+
 #if 0
 // identity map (addr->addr) the device memory with 
 // right cache and permission:

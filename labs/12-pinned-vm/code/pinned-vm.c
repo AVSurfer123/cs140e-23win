@@ -14,6 +14,16 @@
 // (see asm-helpers.h for the cp_asm macro 
 // definition)
 // arm1176.pdf: 3-149
+cp_asm(lockdown_index, 15, 5, c15, c4, 2)
+cp_asm(lockdown_va, 15, 5, c15, c5, 2)
+cp_asm(lockdown_pa, 15, 5, c15, c6, 2)
+cp_asm(lockdown_attr, 15, 5, c15, c7, 2)
+
+cp_asm(control, 15, 0, c1, c0, 0)
+cp_asm(domain_access, 15, 0, c3, c0, 0)
+
+cp_asm(va_translation, 15, 0, c7, c8, 0)
+cp_asm(pa_result, 15, 0, c7, c4, 0)
 
 // do a manual translation in tlb:
 //   1. store result in <result>
@@ -21,7 +31,14 @@
 int tlb_contains_va(uint32_t *result, uint32_t va) {
     // 3-79
     assert(bits_get(va, 0,2) == 0);
-    return staff_tlb_contains_va(result, va);
+    // return staff_tlb_contains_va(result, va);
+    va_translation_set(va);
+    uint32_t pa = pa_result_get();
+    if (pa & 1) {
+        return 0;
+    }
+    *result = (bits_get(pa, 10, 31) << 10) | bits_get(va, 0, 9);
+    return 1;
 }
 
 // map <va>-><pa> at TLB index <idx> with attributes <e>
@@ -30,26 +47,28 @@ void pin_mmu_sec(unsigned idx,
                 uint32_t pa,
                 pin_t e) {
 
-    staff_pin_mmu_sec(idx, va, pa, e);
-    return;
-
     demand(idx < 8, lockdown index too large);
     // lower 20 bits should be 0.
     demand(bits_get(va, 0, 19) == 0, only handling 1MB sections);
     demand(bits_get(pa, 0, 19) == 0, only handling 1MB sections);
 
-    if(va != pa)
-        panic("for today's lab, va (%x) should equal pa (%x)\n",
-                va,pa);
-
     debug("about to map %x->%x\n", va,pa);
 
+    // if(va != pa)
+    //     panic("for today's lab, va (%x) should equal pa (%x)\n",
+    //             va,pa);
 
     // these will hold the values you assign for the tlb entries.
     uint32_t x, va_ent, pa_ent, attr;
+    
+    va_ent = va | e.G << 9 | e.asid;
+    pa_ent = pa | e.pagesize << 6 | e.AP_perm << 1 | 1;
+    attr = e.dom << 7 | e.mem_attr << 1;
 
-    // put your code here.
-    unimplemented();
+    lockdown_index_set(idx);
+    lockdown_va_set(va_ent);
+    lockdown_attr_set(attr);
+    lockdown_pa_set(pa_ent);
 
     if((x = lockdown_va_get()) != va_ent)
         panic("lockdown va: expected %x, have %x\n", va_ent,x);
@@ -98,8 +117,19 @@ void pin_procmap(procmap_t *p) {
     }
 }
 
+// this is called by reboot: we turn off mmu so that things work.
+void reboot_callout(void) {
+    if(mmu_is_enabled())
+        staff_mmu_disable();
+}
+
 void domain_access_ctrl_set(uint32_t d) {
     staff_domain_access_ctrl_set(d);
+    // domain_access_set(d);
+}
+
+void mmu_enable(void) {
+    control_set(control_get() | 1);
 }
 
 // turn the pinned MMU system on.
@@ -115,9 +145,6 @@ void domain_access_ctrl_set(uint32_t d) {
 //       it off.
 //    6. profit!
 void pin_mmu_on(procmap_t *p) {
-    staff_pin_mmu_on(p);
-    return;
-
     assert(!mmu_is_enabled());
 
     // we have to clear the MMU before setting any entries.
@@ -126,10 +153,9 @@ void pin_mmu_on(procmap_t *p) {
 
     void *null_pt = 0;
 
-    todo("fill in the rest from the 1-test* code");
-
-
-
+    domain_access_ctrl_set(dom_perm(p->dom_ids, DOM_client));
+    extern uint32_t interrupt_table[];
+    vector_base_set(interrupt_table);
 
     staff_mmu_on_first_time(1, null_pt);
     assert(mmu_is_enabled());
@@ -139,4 +165,51 @@ void pin_mmu_on(procmap_t *p) {
     pin_debug("going to check entries are pinned\n");
     for(unsigned i = 0; i < p->n; i++)
         pin_check_exists(p->map[i].addr);
+}
+
+void lockdown_print_entry(unsigned idx) {
+        trace("   idx=%d\n", idx);
+        lockdown_index_set(idx);
+        uint32_t va_ent = lockdown_va_get();
+        uint32_t pa_ent = lockdown_pa_get();
+        unsigned v = bit_get(pa_ent, 0);
+    
+        if(!v) {
+            trace("     [invalid entry %d]\n", idx);
+            return;
+        }
+    
+        // 3-149
+        uint32_t va = bits_get(va_ent, 12, 31);
+        uint32_t G = bit_get(va_ent, 9);
+        uint32_t asid = bits_get(va_ent, 0, 7);
+        trace("     va_ent=%x: va=%x|G=%d|ASID=%d\n",
+            va_ent, va, G, asid);
+    
+        // 3-150
+        uint32_t pa = bits_get(pa_ent, 12, 31);
+        uint32_t nsa = bit_get(pa_ent, 9);
+        uint32_t nstid = bit_get(pa_ent, 8);
+        uint32_t size = bits_get(pa_ent, 6, 7);
+        uint32_t apx = bits_get(pa_ent, 1, 3);
+        trace("     pa_ent=%x: pa=%x|nsa=%d|nstid=%d|size=%b|apx=%b|v=%d\n",
+                    pa_ent, pa, nsa,nstid,size, apx,v);
+    
+        // 3-151
+        uint32_t attr = lockdown_attr_get();
+        uint32_t dom = bits_get(attr, 7, 10);
+        uint32_t xn = bit_get(attr, 6);
+        uint32_t tex = bits_get(attr, 3, 5);
+        uint32_t C = bit_get(attr, 2);
+        uint32_t B = bit_get(attr, 1);
+        trace("     attr=%x: dom=%d|xn=%d|tex=%b|C=%d|B=%d\n",
+                attr, dom,xn,tex,C,B);
+    }
+    
+void lockdown_print_entries(const char *msg) {
+    trace("-----  <%s> ----- \n", msg);
+    trace("  pinned TLB lockdown entries:\n");
+    for(int i = 0; i < 8; i++)
+        lockdown_print_entry(i);
+    trace("----- ---------------------------------- \n");
 }

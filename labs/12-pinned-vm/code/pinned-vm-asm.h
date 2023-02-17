@@ -17,17 +17,17 @@
 #include "asm-helpers.h"
 
 // arm1176.pdf: 3-149
-void lockdown_index_set(uint32_t x);
-uint32_t lockdown_index_get(void);
+// void lockdown_index_set(uint32_t x);
+// uint32_t lockdown_index_get(void);
 
-void lockdown_va_set(uint32_t x);
-uint32_t lockdown_va_get(void);
+// void lockdown_va_set(uint32_t x);
+// uint32_t lockdown_va_get(void);
 
-void lockdown_pa_set(uint32_t x);
-uint32_t lockdown_pa_get(void);
+// void lockdown_pa_set(uint32_t x);
+// uint32_t lockdown_pa_get(void);
 
-void lockdown_attr_set(uint32_t x);
-uint32_t lockdown_attr_get(void);
+// void lockdown_attr_set(uint32_t x);
+// uint32_t lockdown_attr_get(void);
 
 void xlate_pa_set(uint32_t x);
 
