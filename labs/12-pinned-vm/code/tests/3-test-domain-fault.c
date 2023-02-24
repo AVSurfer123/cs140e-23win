@@ -108,7 +108,7 @@ void notmain(void) {
     pin_procmap(&p);
 
     PUT32(user_addr, 1);
-    staff_mmu_disable();
+    mmu_disable();
     assert(!mmu_is_enabled());
     trace("MMU is off!\n");
     trace("phys addr1=%x\n", GET32(phys_addr1));

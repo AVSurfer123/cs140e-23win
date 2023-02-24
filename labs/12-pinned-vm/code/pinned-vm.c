@@ -31,7 +31,7 @@ cp_asm(pa_result, 15, 0, c7, c4, 0)
 int tlb_contains_va(uint32_t *result, uint32_t va) {
     // 3-79
     assert(bits_get(va, 0,2) == 0);
-    // return staff_tlb_contains_va(result, va);
+    // return tlb_contains_va(result, va);
     va_translation_set(va);
     uint32_t pa = pa_result_get();
     if (pa & 1) {
@@ -120,17 +120,17 @@ void pin_procmap(procmap_t *p) {
 // this is called by reboot: we turn off mmu so that things work.
 void reboot_callout(void) {
     if(mmu_is_enabled())
-        staff_mmu_disable();
+        mmu_disable();
 }
 
-void domain_access_ctrl_set(uint32_t d) {
-    staff_domain_access_ctrl_set(d);
-    // domain_access_set(d);
-}
+// void domain_access_ctrl_set(uint32_t d) {
+//     domain_access_ctrl_set(d);
+//     // domain_access_set(d);
+// }
 
-void mmu_enable(void) {
-    control_set(control_get() | 1);
-}
+// void mmu_enable(void) {
+//     control_set(control_get() | 1);
+// }
 
 // turn the pinned MMU system on.
 //    1. initialize the MMU (maybe not actually needed): clear TLB, caches
@@ -148,7 +148,7 @@ void pin_mmu_on(procmap_t *p) {
     assert(!mmu_is_enabled());
 
     // we have to clear the MMU before setting any entries.
-    staff_mmu_init();
+    mmu_init();
     pin_procmap(p);
 
     void *null_pt = 0;
@@ -157,7 +157,7 @@ void pin_mmu_on(procmap_t *p) {
     extern uint32_t interrupt_table[];
     vector_base_set(interrupt_table);
 
-    staff_mmu_on_first_time(1, null_pt);
+    mmu_on_first_time(1, null_pt);
     assert(mmu_is_enabled());
     pin_debug("enabled!\n");
 
@@ -165,6 +165,12 @@ void pin_mmu_on(procmap_t *p) {
     pin_debug("going to check entries are pinned\n");
     for(unsigned i = 0; i < p->n; i++)
         pin_check_exists(p->map[i].addr);
+}
+
+void mmu_on_first_time(uint32_t asid, void *empty_pt) {
+    mmu_reset();
+    set_procid_ttbr0(1, asid, empty_pt);
+    mmu_enable();
 }
 
 void lockdown_print_entry(unsigned idx) {

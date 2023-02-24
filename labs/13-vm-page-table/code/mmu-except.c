@@ -60,11 +60,11 @@ void data_abort_vector(unsigned pc) {
     uint32_t va = bits_clr(addr, 0, 19);
     if (status == 0b101) {
         mmu_map_section(proc.pt, va, va, proc.dom_id);
-        staff_mmu_sync_pte_mods();
+        mmu_sync_pte_mods();
     }
     else if (status == 0b1101) {
         mmu_mark_sec_rw(proc.pt, va, 1);
-        staff_mmu_sync_pte_mods();
+        mmu_sync_pte_mods();
     }
     proc.fault_count++;
 }

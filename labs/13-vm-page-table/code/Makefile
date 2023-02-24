@@ -22,11 +22,13 @@ COMMON_SRC += mmu.c
 # STAFF_OBJS += staff-mmu-except.o
 COMMON_SRC += mmu-except.c
 
+COMMON_SRC += your-vm-asm.S
+
 # <staff-mmu-asm.o> this will be removed next lab
-STAFF_OBJS += staff-mmu-asm.o  
+# STAFF_OBJS += staff-mmu-asm.o  
 STAFF_OBJS += $(CS140E_2023_PATH)/libpi/staff-objs/interrupts-asm.o
 STAFF_OBJS += $(CS140E_2023_PATH)/libpi/staff-objs/interrupts-vec-asm.o
-STAFF_OBJS += $(CS140E_2023_PATH)/libpi/staff-objs/kmalloc.o
+# STAFF_OBJS += $(CS140E_2023_PATH)/libpi/staff-objs/kmalloc.o
 
 # set RUN = 1 if you want the code to automatically run after building.
 RUN = 1

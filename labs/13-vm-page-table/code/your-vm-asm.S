@@ -43,7 +43,9 @@ MK_FN(get_cache_type)
 @ something else (or inline into the c code):
 @  void domain_access_ctrl_set(uint32_t dom_reg);
 MK_FN(cp15_domain_ctrl_wr)
-    asm_todo("implement this thursday")
+    DOMAIN_CTRL_WR(r0)
+    mov r1, #0 @ B6-21
+    PREFETCH_FLUSH(r1) @ B2-24
     bx lr
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -53,7 +55,12 @@ MK_FN(cp15_domain_ctrl_wr)
 @   - clear the dcache, icache, tlbs: make sure you obey 
 @     any rules from B2
 MK_FN(mmu_reset)
-    asm_todo("implement this thursday")
+    mov r1, #0 @ B6-21
+    INV_ALL_CACHES(r1) @ B2-21
+    INV_TLB(r1) @ B2-22
+    FLUSH_BTB(r1) @ B2-22
+    DSB(r1) @ B2-22
+    PREFETCH_FLUSH(r1) @ B2-22
     bx lr
 
 
@@ -80,8 +87,15 @@ MK_FN(mmu_disable_set_asm)
     @ the BTB and prefetch and switch MMU on/off atomically.  thus, would
     @ flush, but instructions could get fetched before we could disable,
     @ defeating the purpose.
-
-    asm_todo("implement this thursday")
+    mov r2, #0 @ B6-21
+    CLEAN_INV_DCACHE(r2)
+    DSB(r2)
+    CONTROL_REG1_WR(r0)
+    PREFETCH_FLUSH(r2)
+    INV_ICACHE(r2)
+    FLUSH_BTB(r2) @ B2-22
+    DSB(r2) @ B2-22
+    PREFETCH_FLUSH(r2) @ B2-22
     bx lr
 
 @ void mmu_enable_set_asm(cp15_ctrl_reg1_t c);
@@ -90,7 +104,23 @@ MK_FN(mmu_disable_set_asm)
 @ make sure you look at arm1176, 6-9.
 @
 MK_FN(mmu_enable_set_asm)
-    asm_todo("implement this thursday")
+    @ 6-9
+    mov r2, #0
+    bic r0, r0, #0x1000
+    bic r0, r0, #1
+    CONTROL_REG1_WR(r0)
+    @ B2-24 prefetch after every cp15 write
+    PREFETCH_FLUSH(r2)
+    @ B2-22 sequence
+    INV_ICACHE(r2)
+    FLUSH_BTB(r2)
+    DSB(r2)
+    PREFETCH_FLUSH(r2)
+    orr r0, r0, #0x1000
+    orr r0, r0, #1
+    CONTROL_REG1_WR(r0)
+    DSB(r2)
+    PREFETCH_FLUSH(r2)
     bx lr
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -101,9 +131,30 @@ MK_FN(mmu_enable_set_asm)
 @
 @ this is the fanciest one.
 MK_FN(cp15_set_procid_ttbr0)
-    asm_todo("implement this thursday")
+    mov r2, #0
+    @ Entire sequence is from B2-25
+    ASID_SET(r2)
+    PREFETCH_FLUSH(r2)
+    TTBR0_SET(r1)
+    TTBR1_SET(r2)
+    PREFETCH_FLUSH(r2)
+    ASID_SET(r0)
+    @ Sequence from B2-22
+    FLUSH_BTB(r2)
+    DSB(r2)
+    PREFETCH_FLUSH(r2)
     bx lr
 
+MK_FN(mmu_sync_pte_mods)
+    @ Sequence from B2-23
+    mov r2, #0
+    CLEAN_INV_DCACHE(r2)
+    DSB(r2)
+    INV_TLB(r2)
+    FLUSH_BTB(r2)
+    DSB(r2)
+    PREFETCH_FLUSH(r2)
+    bx lr
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ you need this for pinned-vm.c
@@ -116,6 +167,15 @@ MK_FN(cp15_set_procid_ttbr0)
 @ mmu_enable_set_asm().
 @
 @ also could just call the above from C code! :)
-MK_FN(mmu_on_first_time)
-    asm_todo("implement this for pinned vm")
+@ MK_FN(mmu_on_first_time)
+@     asm_todo("implement this for pinned vm")
+@     bx lr
+
+
+MK_FN(cp15_ctrl_reg1_rd)
+    CONTROL_REG1_RD(r0)
+    bx lr
+
+MK_FN(cp15_ctrl_reg1_wr)
+    CONTROL_REG1_WR(r0)
     bx lr
