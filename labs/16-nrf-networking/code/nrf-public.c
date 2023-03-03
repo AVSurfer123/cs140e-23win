@@ -6,8 +6,7 @@
 // pulls data off if it's on the interface (since there can't be that much
 // and we'd start dropping stuff).
 int nrf_nbytes_avail(nrf_t *n) {
-    while(nrf_get_pkts(n))
-        ;
+    while(nrf_get_pkts(n));
     return cq_nelem(&n->recvq);
 }
 

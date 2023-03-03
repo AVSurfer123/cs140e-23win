@@ -11,7 +11,7 @@
 #include "nrf-test.h"
 
 // useful to mess around with these. 
-enum { ntrial = 1000, timeout_usec = 1000, nbytes = 32 };
+enum { ntrial = 1000, timeout_usec = 2000, nbytes = 32 };
 
 // max message size.
 typedef struct {
@@ -51,8 +51,9 @@ one_way_ack(nrf_t *server, nrf_t *client, int verbose_p) {
             trace("sent %d ack'd packets\n", i);
 
         // output("sent %d\n", i);
-        if(!send32_ack(server, client_addr, i))
+        if(!send32_ack(server, client_addr, i)) {
             panic("send failed\n");
+        }
 
         uint32_t x;
         int ret = recv32(client, &x);

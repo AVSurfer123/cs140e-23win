@@ -1,9 +1,9 @@
-PROGS := $(wildcard tests/3-*.c)
-PROGS := $(wildcard tests/2-*.c)
+# PROGS := $(wildcard tests/3-*.c)
+# PROGS := $(wildcard tests/2-*.c)
 # 1. send one way no ack
-PROGS := $(wildcard tests/1-*.c)
+# PROGS := $(wildcard tests/1-*.c)
 # 0. print configs
-PROGS := $(wildcard tests/0-*.c)
+# PROGS := $(wildcard tests/0-*.c)
 
 # all the tests
 PROGS := $(wildcard tests/[0123]-*.c)
