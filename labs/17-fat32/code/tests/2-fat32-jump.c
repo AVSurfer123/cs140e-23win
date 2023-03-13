@@ -22,7 +22,6 @@ void notmain() {
   printk("Loading the root directory.\n");
   pi_dirent_t root = fat32_get_root(&fs);
 
-#if 0
   printk("Listing files:\n");
   uint32_t n;
   pi_directory_t files = fat32_readdir(&fs, &root);
@@ -34,7 +33,6 @@ void notmain() {
       printk("\tF: %s (cluster %d; %d bytes)\n", files.dirents[i].name, files.dirents[i].cluster_id, files.dirents[i].nbytes);
     }
   }
-#endif
 
     char *name = "BOOTCODE.BIN";
     printk("Looking for %s.\n", name);
@@ -61,20 +59,25 @@ void notmain() {
             fast_hash(f->data,f->n_data));
 
     uint32_t *p = (void*)f->data;
-    for(int i = 0; i < 4; i++) 
+    for(int i = 0; i < 8; i++) 
         printk("p[%d]=%x (%d)\n", i,p[i],p[i]);
 
     // magic cookie at offset 0.
     assert(p[0] == 0x12345678);
 
     // address to copy at is at offset 2
+    uint32_t header_size = p[1];
     uint32_t addr = p[2];
-    assert(addr == 0x100000f0);
+    uint32_t code_size = p[3];
+    assert(addr == 0x80000);
+
+    uint32_t* ptr = (uint32_t*) (addr + header_size);
+    memcpy(ptr, &p[4], code_size);
 
     // jump to it using BRANCHTO.  make sure
     // you skip the header!  (see in hello-f.list
     // and memmap.fixed in 13-fat32/hello-fixed
-    unimplemented();
+    BRANCHTO((uint32_t) ptr);
 
   printk("PASS: %s\n", __FILE__);
   clean_reboot();
