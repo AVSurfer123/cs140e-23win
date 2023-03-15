@@ -53,7 +53,7 @@ interrupt_table:
     b swi_trampoline
     b single_step_trampoline
     b unhandled_data_abort
+    b unhandled_reset
     b interrupt_trampoline
-    b interrupt_trampoline
-
+    b unhandled_fiq
 
