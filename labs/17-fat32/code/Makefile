@@ -9,7 +9,7 @@ COMMON_SRC += fat32.c
 # the tests in decreasing order of difficulty.
 # PROGS := $(wildcard ./tests/[012]-*.c)
 PROGS := $(wildcard ./tests/[3]-*.c)
-PROGS := tests/2-fat32-ls.c
+# PROGS := tests/2-fat32-ls.c
 # PROGS := $(wildcard ./tests/[4]-*.c)
 # PROGS := tests/3-fat32-write.c
 

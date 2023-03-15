@@ -5,12 +5,14 @@
 @ also, the ldr will commonly = a misprediction).
 #include "rpi-asm.h"
 
-.align 5
-.globl interrupt_table
-interrupt_table:
-  ldr pc, =unhandled_reset
-  ldr pc, =unhandled_undefined_instruction
-  ldr pc, =unhandled_swi
-  ldr pc, =unhandled_prefetch_abort
-  ldr pc, =unhandled_data_abort
-  ldr pc, =unhandled_interrupt
+.align 5; 
+.globl _interrupt_table
+_interrupt_table:
+    b unhandled_reset
+    b unhandled_undefined_instruction
+    b unhandled_swi
+    b unhandled_prefetch_abort
+    b unhandled_data_abort
+    b unhandled_interrupt
+    b unhandled_fiq
+

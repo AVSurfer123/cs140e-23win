@@ -154,8 +154,8 @@ void pin_mmu_on(procmap_t *p) {
     void *null_pt = 0;
 
     domain_access_ctrl_set(dom_perm(p->dom_ids, DOM_client));
-    extern uint32_t interrupt_table[];
-    vector_base_set(interrupt_table);
+    extern uint32_t _interrupt_table[];
+    vector_base_set(_interrupt_table);
 
     mmu_on_first_time(1, null_pt);
     assert(mmu_is_enabled());

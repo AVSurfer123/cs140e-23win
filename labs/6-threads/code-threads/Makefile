@@ -14,8 +14,8 @@ PROGS = $(wildcard ./7-test*.c)
 PROGS = $(wildcard tests/1-test*.c)
 # checkoff skips 1 since behavior changes
 PROGS = $(wildcard ./[34567]-test*.c)
-PROGS = $(wildcard ./1-test*.c)
-PROGS = $(wildcard ./$(PART)-test*.c)
+# PROGS = $(wildcard ./1-test*.c)
+# PROGS = $(wildcard ./$(PART)-test*.c)
 
 # uncomment if you want it to automatically run.
 # RUN=1

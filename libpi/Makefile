@@ -15,7 +15,7 @@
 #   SRC := $(wildcard ./src/*.[Sc])
 #
 # currently not defined to hold anything
-SRC := ./src/gpio.c ./src/uart.c ./src/sw-uart.c ./src/interrupt-asm.S
+SRC := ./src/gpio.c ./src/gpio-int.c ./src/uart.c ./src/sw-uart.c ./src/interrupt-asm.S
 
 # if you want to use our gpio.o or other .o (e.g., if yours
 # is acting weird):
@@ -26,7 +26,7 @@ SRC := ./src/gpio.c ./src/uart.c ./src/sw-uart.c ./src/interrupt-asm.S
 # STAFF_OBJS  +=  ./staff-objs/gpio.o
 # STAFF_OBJS  +=  ./staff-objs/uart.o
 # STAFF_OBJS  +=  ./staff-objs/gpio-pud.o
-STAFF_OBJS  +=  ./staff-objs/gpio-int.o 
+# STAFF_OBJS  +=  ./staff-objs/gpio-int.o 
 STAFF_OBJS += ./staff-objs/kmalloc.o
 
 # automatically add all staff src from:  libc, 

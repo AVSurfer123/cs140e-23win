@@ -3,7 +3,7 @@
 #include "vector-base.h"
 #include "rpi-inline-asm.h"
 
-void * int_vec_reset(void *vec) {
+void* int_vec_reset(void *vec) {
     return vector_base_reset(vec);
 }
 
