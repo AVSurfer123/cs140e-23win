@@ -130,7 +130,7 @@ pin_nonglobal(pin_pt_t *pt, uint32_t asid, int verbose_p) {
         // we pin invalid entries to make sure we clear out old
         // entries from previous processes
         if(!pin_is_valid(&e)) {
-            // staff_pin_mmu_sec(i,e.va, e.pa, e.attr);
+            // pin_mmu_sec(i,e.va, e.pa, e.attr);
             continue;
         }
         if(e.attr.G)
@@ -140,7 +140,7 @@ pin_nonglobal(pin_pt_t *pt, uint32_t asid, int verbose_p) {
         if(verbose_p)
             output("pinning %d: %x->%x [asid=%d]\n", 
                 i, e.va, e.pa, e.attr.asid);
-        staff_pin_mmu_sec(i,e.va, e.pa, e.attr);
+        pin_mmu_sec(i,e.va, e.pa, e.attr);
         ng++;
     }
     return ng;
@@ -190,7 +190,7 @@ void switch_vm(pctx_t *ctx) {
             name = "unknown";
         // output("pinned %d entries for name=%s\n", n, name);
     }
-    staff_cp15_set_procid_ttbr0(p->pid << 8 | asid, ctx->null_pt);
+    cp15_set_procid_ttbr0(p->pid << 8 | asid, ctx->null_pt);
 }
 
 #if 0
@@ -210,7 +210,7 @@ void *pin_tmp_map_set(unsigned idx, uint32_t va_addr, uint32_t pa_sec) {
     pin_pte_t e = pin_pte_mk(va_addr, pa_sec<<20, attr);
 
     assert(idx<8);
-    staff_pin_mmu_sec(idx, e.va, e.pa, e.attr);
+    pin_mmu_sec(idx, e.va, e.pa, e.attr);
     return (void*)va_addr;
 }
 
@@ -219,7 +219,7 @@ void pin_tmp_map_clr(unsigned idx, uint32_t sec) {
     assert(idx<8);
 
     // you'll need to implement this.
-    staff_pin_clear(idx);
+    pin_clear(idx);
 }
 
 // issue here is that i think you can't reuse the VA without clean
@@ -441,25 +441,25 @@ void equiv_driver(pctx_t *ctx) {
         if(!pin_is_valid(e))
             continue;
         assert(e->attr.G);
-        staff_pin_mmu_sec(i,e->va, e->pa, e->attr);
+        pin_mmu_sec(i,e->va, e->pa, e->attr);
     }
 
     // should check output since it encodes the scheduling decisions,
     // which should be the same.
     // enum { R = 100 };
     
-    config.random_switch = 0;
-    config.do_vm_off_on = 0;
+    config.random_switch = 10;
+    config.do_vm_off_on = 1;
 
-    staff_domain_access_ctrl_set(dom_mask);
+    domain_access_ctrl_set(dom_mask);
     assert(!mmu_is_enabled());
 
-    staff_mmu_on_first_time(1, ctx->null_pt);
+    mmu_on_first_time(1, ctx->null_pt);
     assert(mmu_is_enabled());
     for(unsigned i = 0; i < MAX_PINS; i++) { 
         pin_pte_t *e = &pt.pins[i];
         if(!pin_is_valid(e))
-            staff_pin_check_exists(e->va);
+            pin_check_exists(e->va);
     }
     assert(mmu_is_enabled());
 

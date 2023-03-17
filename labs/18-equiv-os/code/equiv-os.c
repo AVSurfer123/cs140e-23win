@@ -263,13 +263,13 @@ void prefetch_abort_full(uint32_t regs[17]) {
         uint32_t cp15_ctrl_reg1_get(void);
 
         pstats_vm_off_on_inc(&ctx->stats, p); 
-        uint32_t old = cp15_ctrl_reg1_get();
-        staff_mmu_disable();
+        cp15_ctrl_reg1_t old = cp15_ctrl_reg1_rd();
+        mmu_disable();
         assert(!mmu_is_enabled());
-        staff_mmu_enable();
+        mmu_enable();
         assert(mmu_is_enabled());
-        uint32_t new = cp15_ctrl_reg1_get();
-        assert(old == new);
+        cp15_ctrl_reg1_t new = cp15_ctrl_reg1_rd();
+        assert(*(uint32_t*) &old == *(uint32_t*) &new);
     }
 
     // default: switch every time.  if randomswitch we

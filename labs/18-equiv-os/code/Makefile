@@ -33,33 +33,33 @@ STAFF_OBJS += staff-equiv-os-asm.o
 ########################################################################
 # Part 1:
 #    this is from lab 11.
-SS_LAB = 11-equiv-proc/code
-STAFF_OBJS += staff-breakpoint.o
+SS_LAB = ../../11-equiv-proc/code
+# STAFF_OBJS += staff-breakpoint.o
 
 # will have to uncomment both
-# CFLAGS += -I$(SS_LAB)
-# COMMON_SRC += $(SS_LAB)/breakpoint.c
+CFLAGS += -I$(SS_LAB)
+COMMON_SRC += $(SS_LAB)/breakpoint.c
 
 ########################################################################
 # Part 2: 
 #    this is from lab 12.
 PIN_LAB = ../../12-pinned-vm/code
 CFLAGS += -I$(PIN_LAB)
-STAFF_OBJS += staff-pinned-vm.o
-# COMMON_SRC += $(PIN_LAB)/pinned-vm.c
+# STAFF_OBJS += staff-pinned-vm.o
+COMMON_SRC += $(PIN_LAB)/pinned-vm.c
 
 ########################################################################
 # Part 3:
 #   this is from lab 13
 VM_LAB = ../../13-vm-page-table/code
-STAFF_OBJS += staff-mmu-asm.o
+# STAFF_OBJS += staff-mmu-asm.o
 # uncomment both to swap
-# CFLAGS += -I$(VM_LAB)
-# COMMON_SRC += $(VM_LAB)/your-mmu-asm.S
+CFLAGS += -I$(VM_LAB)
+COMMON_SRC += $(VM_LAB)/your-vm-asm.S $(VM_LAB)/mmu-helpers.c
 
 # this is from lab 13
-STAFF_OBJS += staff-mmu.o
-# COMMON_SRC += $(VM_LAB)/mmu.c
+# STAFF_OBJS += staff-mmu.o
+COMMON_SRC += $(VM_LAB)/mmu.c
 
 ########################################################################
 

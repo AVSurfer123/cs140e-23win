@@ -52,7 +52,7 @@ void pin_mmu_sec(unsigned idx,
     demand(bits_get(va, 0, 19) == 0, only handling 1MB sections);
     demand(bits_get(pa, 0, 19) == 0, only handling 1MB sections);
 
-    debug("about to map %x->%x\n", va,pa);
+    // debug("about to map %x->%x\n", va,pa);
 
     // if(va != pa)
     //     panic("for today's lab, va (%x) should equal pa (%x)\n",
@@ -76,6 +76,15 @@ void pin_mmu_sec(unsigned idx,
         panic("lockdown pa: expected %x, have %x\n", pa_ent,x);
     if((x = lockdown_attr_get()) != attr)
         panic("lockdown attr: expected %x, have %x\n", attr,x);
+}
+
+void pin_clear(unsigned idx) {
+    demand(idx < 8, lockdown index too large);
+    lockdown_index_set(idx);
+    lockdown_pa_set(0);
+    int x;
+    if((x = lockdown_pa_get()) != 0)
+        panic("lockdown pa: expected %x, have %x\n", 0, x);
 }
 
 
