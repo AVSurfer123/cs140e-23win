@@ -61,15 +61,17 @@ void sw_uart_put8(sw_uart_t *uart, unsigned char c) {
 //      EASY BUG: if you are reading input, but you do not get here in 
 //      time it will disappear.
 int sw_uart_get8(sw_uart_t *uart) {
-    uint32_t start = cycle_cnt_read();
     while (gpio_read(uart->rx) == 1) {
     }
-    delay_cycles(uart->cycle_per_bit / 2);
+    uint32_t start = cycle_cnt_read();
     int byte = 0;
+    uint32_t half = uart->cycle_per_bit / 2;
     for (int i = 0; i < 8; i++) {
+        delay_ncycles(start, (i + 1) * uart->cycle_per_bit + half);
         byte |= gpio_read(uart->rx) << i;
     }
-    delay_cycles(uart->cycle_per_bit);
+    delay_ncycles(start, 9 * uart->cycle_per_bit + half);
+    assert(gpio_read(uart->rx) == 1); // Stop bit should be set now
     return byte;
 }
 
@@ -85,6 +87,7 @@ sw_uart_t sw_uart_mk_helper(unsigned tx, unsigned rx,
     //     this is set!!
     // todo("set up the right GPIO pins with the right values");
     gpio_set_input(rx);
+    gpio_set_pullup(rx);
     gpio_set_output(tx);
     timed_write(tx, 1, cyc_per_bit);
 

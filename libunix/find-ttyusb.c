@@ -47,14 +47,13 @@ char *find_ttyusb(void) {
     struct dirent** dirs;
     int num_dir = scandir("/dev", &dirs, filter, alphasort);
     if (num_dir == -1) {
-        panic("scandir failed");
+        panic("scandir failed\n");
     }
-    printf("Found %d dirs that matched\n", num_dir);
     if (num_dir == 0) {
-        panic("Found no USB devices connected!");
+        panic("Found no USB devices connected!\n");
     }
     if (num_dir > 1) {
-        panic("Found multiple USB devices connected!");
+        panic("Found multiple USB devices connected!\n");
     }
     struct dirent* device = *dirs;
     const static char* prefix = "/dev/";
@@ -71,11 +70,10 @@ char *find_ttyusb_last(void) {
     struct dirent** dirs;
     int num_dir = scandir("/dev", &dirs, filter, alphasort);
     if (num_dir == -1) {
-        perror("scandir failed");
+        panic("scandir failed\n");
     }
-    printf("Found %d dirs that matched\n", num_dir);
     if (num_dir == 0) {
-        panic("Found no USB devices connected!");
+        panic("Found no USB devices connected!\n");
     }
     
     time_t last_time = 0;
@@ -92,10 +90,10 @@ char *find_ttyusb_last(void) {
         struct stat file_info;
         int ret = stat(buf, &file_info);
         if (ret == -1) {
-            perror("Error in stat");
+            panic("Error in stat\n");
         }
-        if (file_info.st_mtime > last_time) {
-            last_time = file_info.st_mtime;
+        if (file_info.st_ctime > last_time) {
+            last_time = file_info.st_ctime;
             last_usb = buf;
         }
         else {
@@ -112,11 +110,10 @@ char *find_ttyusb_first(void) {
     struct dirent** dirs;
     int num_dir = scandir("/dev", &dirs, filter, alphasort);
     if (num_dir == -1) {
-        perror("scandir failed");
+        panic("scandir failed\n");
     }
-    printf("Found %d dirs that matched\n", num_dir);
     if (num_dir == 0) {
-        panic("Found no USB devices connected!");
+        panic("Found no USB devices connected!\n");
     }
     
     time_t first_time = INT32_MAX;
@@ -133,10 +130,10 @@ char *find_ttyusb_first(void) {
         struct stat file_info;
         int ret = stat(buf, &file_info);
         if (ret == -1) {
-            perror("Error in stat");
+            panic("Error in stat\n");
         }
-        if (file_info.st_mtime < first_time) {
-            first_time = file_info.st_mtime;
+        if (file_info.st_ctime < first_time) {
+            first_time = file_info.st_ctime;
             first_usb = buf;
         }
         else {

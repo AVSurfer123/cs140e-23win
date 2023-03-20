@@ -1,4 +1,4 @@
-PROG_SRC = my-install.c
+PROG_SRC = my-install.c echo.c
 SRC = simple-boot.c put-get.c
 CFLAGS += -I../2-pi-side
 

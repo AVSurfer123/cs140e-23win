@@ -12,7 +12,7 @@ PROGS = hello.c
 PROGS = $(wildcard ./1-*.c)
 
 #once your sw-uart works: add sw-uart-veneer.c
-# COMMON_SRC += sw-uart-veneer.c
+COMMON_SRC += sw-uart-veneer.c
 COMMON_SRC += sw-uart.c
 
 # can use the staff code to see that things work.

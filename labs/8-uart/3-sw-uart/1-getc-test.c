@@ -5,11 +5,17 @@
 #include "sw-uart.h"
 
 void notmain(void) {
-    uart_init();
+    // uart_init();
     // enable_cache();
 
     // use pin 20 for tx, 21 for rx
-    sw_uart_t u = sw_uart_init(20,21, 115200);
+    // sw_uart_t u = sw_uart_init(1, 0, 115200);
+    // turn off the hw UART so can use the same device.
+    // uart_disable();
+
+    // use pin 14 for tx, 15 for rx
+    sw_uart_t u = sw_uart_init(14, 15, 115200);
+    // sw_uart_t u = sw_uart_init(0, 1, 115200);
 
     // just loop asking for one character.  enough delay that should work fine.
     for(int i = 0; i < 4; i++) {
