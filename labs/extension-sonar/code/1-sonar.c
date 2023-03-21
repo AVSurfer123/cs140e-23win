@@ -3,7 +3,7 @@
 #include "hc-sr04.h"
 
 // use this timeout(in usec) so everyone is consistent.
-enum { timeout = 55000, echo_pin = 21, trigger_pin = 20 };
+enum { timeout = 55000, echo_pin = 26, trigger_pin = 19 };
 
 void notmain(void) {
 	printk("starting sonar: trigger=%d, echo=%d!\n", 
@@ -11,14 +11,14 @@ void notmain(void) {
     hc_sr04_t h = hc_sr04_init(trigger_pin, echo_pin);
 	printk("sonar ready!\n");
 
-    for(int dist, ntimeout = 0, i = 0; i < 10; i++) {
+    for(int dist, ntimeout = 0, i = 0; i < 500; i++) {
         int dist;
         // read until no timeout.
         while((dist = hc_sr04_get_distance(h, timeout)) < 0)
             printk("timeout!\n");
         printk("distance = %d inches\n", dist);
         // wait a second
-        delay_ms(1000);
+        delay_ms(100);
     }
 	printk("stopping sonar !\n");
     clean_reboot();

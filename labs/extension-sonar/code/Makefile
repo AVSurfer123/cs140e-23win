@@ -12,8 +12,8 @@
 PROG_SRC = 1-sonar.c
 
 #### switch these two around to write your own
-STAFF_OBJS = staff-hc-sr04.o
-# MY_OBJS = hc-sr04.o
+# STAFF_OBJS = staff-hc-sr04.o
+MY_OBJS = hc-sr04.o
 
 PROG_OBJS = $(PROG_SRC:.c=.o)
 PROGS = $(PROG_SRC:.c=.bin)
