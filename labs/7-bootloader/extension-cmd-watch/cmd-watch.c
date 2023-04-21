@@ -27,8 +27,9 @@
 #define _SVID_SOURCE
 #include <dirent.h>
 
-static const char* FILE_SUFFIXES[] = { ".c", ".h", ".S", "Makefile", 0 };
+static const char* FILE_SUFFIXES[] = { ".c", ".h", ".S", ".cpp", ".hpp", "Makefile", 0 };
 static time_t last_mtime;   // store last modification time.
+static const char* dirname = ".";
 
 static int filter(const struct dirent *d) {
     // scan through the prefixes, returning 1 when you find a match.
@@ -36,9 +37,10 @@ static int filter(const struct dirent *d) {
     const char** pointer = FILE_SUFFIXES;
     while (*pointer != NULL) {
         if (strstr(d->d_name, *pointer) != NULL) {
-            char full_path[strlen(d->d_name) + 5];
+            char full_path[strlen(d->d_name) + strlen(dirname) + 5];
             full_path[0] = 0;
-            strcat(full_path, "./");
+            strcat(full_path, dirname);
+            strcat(full_path, "/");
             strcat(full_path, d->d_name);
             struct stat info;
             int ret = stat(full_path, &info);
@@ -62,8 +64,6 @@ static int filter(const struct dirent *d) {
 // that match the suffixes in <suffixes> and check  if any
 // have changed since the last time.
 int check_activity(void) {
-    const char *dirname = ".";
-
     struct dirent** files;
     int num_files = scandir(dirname, &files, filter, alphasort);
     if (num_files == -1) {
@@ -146,7 +146,13 @@ static void run(char *argv[]) {
 int main(int argc, char *argv[]) {
     if(argc < 2)
         die("cmd-watch: not enough arguments\n");
-        
+
+    if (strcmp(argv[1], "-d") == 0 || strcmp(argv[1], "--dir") == 0) {
+        dirname = argv[2];
+        argv += 2;
+    }
+    printf("Looking at files within: %s\n", dirname);
+
     char** program_args = argv + 1;
     print_argv(program_args);
 
