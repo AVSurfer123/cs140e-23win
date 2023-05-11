@@ -1,5 +1,5 @@
 #include "equiv-os.h"
-#include "fixed/byte-array-prog-vec.h"
+#include "user-progs/byte-array-prog-vec.h"
 
 // run a single program respawning.
 void init(pctx_t *ctx) {

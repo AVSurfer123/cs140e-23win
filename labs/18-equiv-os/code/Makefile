@@ -3,9 +3,9 @@ BOOTLOADER=my-install
 START = staff-start.o 
 
 PROGS := $(wildcard tests/0-*.c)
-PROGS := $(wildcard tests/1-*.c)
-PROGS := tests/0-prog-alloc.c
-PROGS := tests/3-do-all.c
+#PROGS := $(wildcard tests/1-*.c)
+#PROGS := tests/0-prog-alloc.c
+#PROGS := tests/3-do-all.c
 
 # have a common library for the tests
 # LIB = libasm.a 
